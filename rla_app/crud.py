@@ -34,3 +34,19 @@ def rla_create_text_analysis(db: Session, text_analysis: schemas.TextAnalysisCre
     db.commit()
     db.refresh(db_analysis)
     return db_analysis
+
+
+def rla_patch_text_analysis(db: Session, analysis: schemas.TextAnalysisUpdate):
+    # get the existing data
+    db_analysis = db.query(models.TextAnalysis).filter(models.TextAnalysis.id == analysis.id).one_or_none()
+    if db_analysis is None:
+        return None
+
+    # Update model class variable from requested fields
+    for var, value in vars(analysis).items():
+        setattr(db_analysis, var, value) if value else None
+
+    db.add(db_analysis)
+    db.commit()
+    db.refresh(db_analysis)
+    return db_analysis

@@ -2,16 +2,22 @@ from typing import List
 
 from fastapi import Depends, FastAPI, HTTPException, File, UploadFile
 from fastapi.responses import HTMLResponse
+
 from sqlalchemy.orm import Session
+from database import SessionLocal, engine
 
 from PIL import Image
 from pytesseract import image_to_string, pytesseract
+import PyPDF2
+import io
+
+from celery.result import AsyncResult
+import tasks
 
 import crud
 import models
 import schemas
 
-from database import SessionLocal, engine
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -40,6 +46,11 @@ async def rla_create_file(db: Session = Depends(rla_get_db), files: List[UploadF
             file_crud_data.content = image_to_string(image_file)
         elif file.content_type.startswith('text/'):
             file_crud_data.content = await file.read()
+        elif file.content_type == 'application/pdf':
+            pdf = PyPDF2.PdfFileReader(file.file)
+            file_crud_data.content = ''
+            for page in pdf.pages:
+                file_crud_data.content += page.extractText() + ' '
         else:
             return {'File type not supported'}
 
@@ -49,9 +60,13 @@ async def rla_create_file(db: Session = Depends(rla_get_db), files: List[UploadF
         analysis_crud_data = schemas.TextAnalysisCreate
         analysis_crud_data.file_id = file_import.id
         text_analysis = crud.rla_create_text_analysis(db, analysis_crud_data)
-        # Launch Celery tasks and patch corresponding fields when task is done
+
+        zipfs = tasks.zipfs_law(file_import.content)
+        # count_task_id = count_task.task_id
+        # count_result = AsyncResult(count_task_id)
         treated_data.append({
-            'file_name': file_import.name, 'analysis_path': '/analysis/' + str(text_analysis.id)
+            'file_name': file_import.name, 'analysis_path': '/analysis/' + str(text_analysis.id),
+            'zipfs': zipfs,
         })
 
     return treated_data

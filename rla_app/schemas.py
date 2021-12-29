@@ -15,6 +15,10 @@ class TextAnalysisCreate(TextAnalysisBase):
     pass
 
 
+class TextAnalysisUpdate(TextAnalysisBase):
+    pass
+
+
 class TextAnalysis(TextAnalysisBase):
     id: int
 
