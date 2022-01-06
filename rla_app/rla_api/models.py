@@ -18,4 +18,5 @@ class TextAnalysis(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     file_id = Column(Integer, index=True)
-    letter_count = Column(String, index=True)
+    numeric_diff = Column(Integer, index=True)
+    percentage_diff = Column(Integer, index=True)

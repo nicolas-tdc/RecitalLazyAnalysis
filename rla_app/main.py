@@ -69,7 +69,7 @@ async def rla_create_file(db: Session = Depends(rla_get_db), files: List[UploadF
         analysis_crud_data.file_id = file_import.id
         text_analysis = crud.rla_create_text_analysis(db, analysis_crud_data)
 
-        zipf_task = tasks.rla_zipf_task(file_import.content)
+        zipf_task = tasks.rla_zipf_task(db, file_import.content, text_analysis.id)
         treated_data.append({
             'file_name': file_import.name, 'analysis_path': '/analysis/' + str(text_analysis.id),
         })
