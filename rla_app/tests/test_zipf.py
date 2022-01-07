@@ -1,6 +1,6 @@
 """This file handles tests for zipf calculations task."""
 
-import tasks
+import rla_app.tasks as tasks
 
 
 def test_rla_word_frequencies():

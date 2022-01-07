@@ -6,15 +6,14 @@ from fastapi import Depends, FastAPI, HTTPException, File, UploadFile
 from fastapi.responses import HTMLResponse
 
 from sqlalchemy.orm import Session
-from rla_api.database import SessionLocal, engine
+from rla_app.rla_api.database import SessionLocal, engine
 
 from PIL import Image
 from pytesseract import image_to_string, pytesseract
 import PyPDF2
 
-import tasks
-
-from rla_api import crud, models, schemas
+from rla_app import tasks
+from rla_app.rla_api import crud, models, schemas
 
 
 models.Base.metadata.create_all(bind=engine)
@@ -47,8 +46,10 @@ async def rla_create_file(db: Session = Depends(rla_get_db), files: List[UploadF
 
     for file in files:
         file_crud_data = schemas.FileImportCreate
+
+        # Read text from uploaded file depending on mimetype.
         if file.content_type.startswith('image/'):
-            # Needed in Windows 10 to find tesseract app
+            # Needed in Windows 10 to find tesseract app.
             pytesseract.tesseract_cmd = r'C:/OCR/tesseract.exe'
             image_file = Image.open(file.file)
             file_crud_data.content = image_to_string(image_file)
@@ -64,7 +65,7 @@ async def rla_create_file(db: Session = Depends(rla_get_db), files: List[UploadF
 
         file_crud_data.name = file.filename
         file_import = crud.rla_create_file(db, file_crud_data)
-        # Create Text Analysis
+        # Create Text Analysis.
         analysis_crud_data = schemas.TextAnalysisCreate
         analysis_crud_data.file_id = file_import.id
         text_analysis = crud.rla_create_text_analysis(db, analysis_crud_data)

@@ -2,12 +2,12 @@
 
 from __future__ import absolute_import
 
-from celery_app import app
+from rla_app.celery_app import app
 
 from collections import Counter
 import re
 
-from rla_api import crud, schemas
+from rla_app.rla_api import crud, schemas
 
 
 @app.task()
@@ -24,6 +24,7 @@ def rla_zipf_task(db, text, analysis_id):
 
     if words_freq:
         zipf = rla_calculate_zipf(words_freq)
+        # Update text analysis with zipf calculations.
         analysis_crud_data = schemas.TextAnalysisPatch
         analysis_crud_data.id = analysis_id
         analysis_crud_data.numeric_diff = zipf['numeric_diff']
@@ -49,6 +50,7 @@ def rla_calculate_zipf(words_freq):
         num_diff += abs(word_data['numeric_diff'])
         percentage_diff += word_data['percentage_diff']
 
+    # Calculate average values
     zipf['numeric_diff'] = num_diff / len(words_freq)
     zipf['percentage_diff'] = percentage_diff / len(words_freq)
 
@@ -64,12 +66,10 @@ def rla_word_zipf(word, key, first_frequency):
     """
 
     zipf_freq = first_frequency / (key + 1)
-    numeric_diff = word[1] - zipf_freq
-    percentage_diff = (word[1] / zipf_freq) * 100
 
     return {
-        'numeric_diff': numeric_diff,
-        'percentage_diff': percentage_diff,
+        'numeric_diff': word[1] - zipf_freq,
+        'percentage_diff': (word[1] / zipf_freq) * 100,
     }
 
 
