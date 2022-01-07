@@ -34,7 +34,7 @@ def rla_get_db():
         db.close()
 
 
-@app.post("/files/")
+@app.post("/files-import/")
 async def rla_create_file(db: Session = Depends(rla_get_db), files: List[UploadFile] = File(...)):
     """
     :param db:
@@ -140,7 +140,7 @@ async def rla_upload_file_for_analysis():
 
     return """
         <body>
-        <form action="/files/" method="post" enctype="multipart/form-data">
+        <form action="/files-import/" method="post" enctype="multipart/form-data">
         <input name="files" type="file" multiple>
         <input type="submit">
         </form>
