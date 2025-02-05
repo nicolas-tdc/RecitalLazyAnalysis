@@ -1,9 +1,7 @@
-# RecitalLazyAnalysis
+# RecitalLazyAnalysis (WIP)
 This API is used to analyse files (text, pdf and images) comparing word frequencies in the file's text with Zipf's Law's predictions.
 
 Created using FastAPI, SQLAlchemy and Celery.
-
-As I was unable to use Docker, this app requires to be plugged into a Broker and Backend of your choice (RabbitMQ, Redis...) in /rla_app/celery_app.py
 
 ---
 
